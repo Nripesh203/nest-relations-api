@@ -40,7 +40,7 @@ export class PostService {
   }
 
   async getCommentsInPost(id: number) {
-    const query = `SELECT * FROM comments WHERE user_id = $1`;
+    const query = `SELECT * FROM comments WHERE post_id = $1`;
 
     const result = await this.pool.query(query, [id]);
 
