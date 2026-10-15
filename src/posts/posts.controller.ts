@@ -1,10 +1,18 @@
-import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  UseGuards,
+} from '@nestjs/common';
 import { PostService } from './posts.service';
+import { JwtGuard } from '../auth/jwt-auth.guard';
 
 @Controller('api')
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
+  @UseGuards(JwtGuard)
   @Get('posts')
   async getPosts() {
     return this.postService.getPosts();
