@@ -8,6 +8,7 @@ import {
   Post,
   Req,
   Put,
+  Delete,
 } from '@nestjs/common';
 import { PostService } from './posts.service';
 import { JwtGuard } from '../auth/jwt-auth.guard';
@@ -76,5 +77,15 @@ export class PostController {
       postId,
       updatepostDto,
     );
+  }
+
+  @UseGuards(JwtGuard)
+  @Delete('delete/posts/:id')
+  async deletePost(
+    @Param('id', ParseIntPipe) postId: number,
+    @Req()
+    req: Request & { user: { userId: number | string; username: string } },
+  ) {
+    return this.postService.deletePost(postId, Number(req.user.userId));
   }
 }

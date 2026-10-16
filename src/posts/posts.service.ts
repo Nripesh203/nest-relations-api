@@ -104,4 +104,15 @@ export class PostService {
 
     return result.rows[0];
   }
+
+  async deletePost(userId: number, postId: number) {
+    const query = `DELETE FROM posts WHERE post_id = $1 and user_id = $2 RETURNING post_id`;
+
+    const result = await this.pool.query(query, [postId, userId]);
+
+    if (result.rows.length === 0)
+      throw new NotFoundException(`Post with Id ${postId} not found.`);
+
+    return `Post with ID ${postId} deleted successfully.`;
+  }
 }
