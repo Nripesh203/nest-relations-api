@@ -1,5 +1,7 @@
 import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { Pool } from 'pg';
+import { CreatePostDto } from '../DTO/createPost.dto';
+import { UpdatePostDto } from '../DTO/updatePost.dto';
 
 @Injectable()
 export class PostService {
@@ -53,5 +55,53 @@ export class PostService {
     const result = await this.pool.query(query, [id]);
 
     return result.rows;
+  }
+
+  async createPost(userId: number, createPost: CreatePostDto) {
+    const query = `INSERT INTO posts (user_id, description)
+                    VALUES ($1, $2) RETURNING user_id, description`;
+
+    const result = await this.pool.query(query, [
+      userId,
+      createPost.description,
+    ]);
+
+    return result.rows;
+  }
+
+  async getPostById(id: number) {
+    const query = `SELECT u.username, p.post_id, p.description, p.created_at
+                    FROM users u
+                    INNER JOIN posts p ON u.user_id = p.user_id
+                    WHERE p.post_id = $1`;
+
+    const result = await this.pool.query(query, [id]);
+
+    if (result.rows.length === 0)
+      throw new NotFoundException(`Post with ID ${id} not found.`);
+
+    return result.rows[0];
+  }
+
+  async updatePost(
+    userId: number,
+    postId: number,
+    updatepostDto: UpdatePostDto,
+  ) {
+    const query = `UPDATE posts
+                   SET description = $1
+                   WHERE post_id = $2 AND user_id = $3
+                    RETURNING post_id, user_id, description, created_at`;
+
+    const result = await this.pool.query(query, [
+      updatepostDto.description,
+      postId,
+      userId,
+    ]);
+
+    if (result.rows.length === 0)
+      throw new NotFoundException(`Post with ID ${postId} not found.`);
+
+    return result.rows[0];
   }
 }
