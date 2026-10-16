@@ -2,6 +2,7 @@ import { Injectable, Inject, NotFoundException } from '@nestjs/common';
 import { Pool } from 'pg';
 import { CreatePostDto } from '../DTO/createPost.dto';
 import { UpdatePostDto } from '../DTO/updatePost.dto';
+import { CreateCommentDto } from '../DTO/createComment.dto';
 
 @Injectable()
 export class PostService {
@@ -114,5 +115,23 @@ export class PostService {
       throw new NotFoundException(`Post with Id ${postId} not found.`);
 
     return `Post with ID ${postId} deleted successfully.`;
+  }
+
+  async postComments(
+    userId: number,
+    postId: number,
+    createCommentDto: CreateCommentDto,
+  ) {
+    const query = `INSERT INTO comments (user_id, post_id, comment_text)
+                    VALUES ($1, $2, $3) 
+                    RETURNING comment_id, user_id, post_id, comment_text`;
+
+    const result = await this.pool.query(query, [
+      userId,
+      postId,
+      createCommentDto.comment_text,
+    ]);
+
+    return result.rows[0];
   }
 }

@@ -15,6 +15,8 @@ import { JwtGuard } from '../auth/jwt-auth.guard';
 import { CreatePostDto } from '../DTO/createPost.dto';
 import { Request } from 'express';
 import { UpdatePostDto } from '../DTO/updatePost.dto';
+import { create } from 'domain';
+import { CreateCommentDto } from '../DTO/createComment.dto';
 
 @Controller('api')
 export class PostController {
@@ -87,5 +89,20 @@ export class PostController {
     req: Request & { user: { userId: number | string; username: string } },
   ) {
     return this.postService.deletePost(postId, Number(req.user.userId));
+  }
+
+  @UseGuards(JwtGuard)
+  @Post('posts/:id/comments')
+  async postComments(
+    @Param('id', ParseIntPipe) postId: number,
+    @Body() createCommentDto: CreateCommentDto,
+    @Req()
+    req: Request & { user: { userId: number | string; username: string } },
+  ) {
+    return this.postService.postComments(
+      Number(req.user.userId),
+      postId,
+      createCommentDto,
+    );
   }
 }
