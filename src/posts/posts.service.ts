@@ -3,6 +3,7 @@ import {
   Inject,
   NotFoundException,
   ForbiddenException,
+  ConflictException,
 } from '@nestjs/common';
 import { Pool } from 'pg';
 import { CreatePostDto } from '../DTO/createPost.dto';
@@ -184,5 +185,37 @@ export class PostService {
       );
     }
     return `Comment with ID ${commentId} deleted successfully.`;
+  }
+
+  async likePost(userId: number, postId: number) {
+    const query = `INSERT INTO post_likes (user_id, post_id)
+                   VALUES ($1, $2) RETURNING user_id, post_id`;
+
+    try {
+      const result = await this.pool.query(query, [userId, postId]);
+
+      return result.rows[0];
+    } catch (error: unknown) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === '23505'
+      ) {
+        throw new ConflictException(`You have already liked this post.`);
+      }
+
+      throw error;
+    }
+  }
+
+  async unlikePost(userId: number, postId: number) {
+    const query = `DELETE FROM post_likes
+                   WHERE user_id = $1 AND post_id = $2
+                   RETURNING post_id`;
+
+    const result = await this.pool.query(query, [userId, postId]);
+
+    return `Like with post ID ${postId} removed successfully.`;
   }
 }

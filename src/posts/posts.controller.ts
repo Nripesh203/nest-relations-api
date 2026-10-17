@@ -131,4 +131,24 @@ export class PostController {
   ) {
     return this.postService.deleteComment(Number(req.user.userId), commentId);
   }
+
+  @UseGuards(JwtGuard)
+  @Post('posts/:id/likes')
+  async likePost(
+    @Param('id', ParseIntPipe) postId: number,
+    @Req()
+    req: Request & { user: { userId: number | string; username: string } },
+  ) {
+    return this.postService.likePost(Number(req.user.userId), postId);
+  }
+
+  @UseGuards(JwtGuard)
+  @Delete('delete/posts/:id/likes')
+  async unlikePost(
+    @Param('id', ParseIntPipe) postId: number,
+    @Req()
+    req: Request & { user: { userId: string | Number; username: string } },
+  ) {
+    return this.postService.unlikePost(Number(req.user.userId), postId);
+  }
 }
