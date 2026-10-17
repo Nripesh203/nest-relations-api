@@ -17,6 +17,7 @@ import { Request } from 'express';
 import { UpdatePostDto } from '../DTO/updatePost.dto';
 import { create } from 'domain';
 import { CreateCommentDto } from '../DTO/createComment.dto';
+import { UpdateCommentDto } from '../DTO/updateComment.dto';
 
 @Controller('api')
 export class PostController {
@@ -103,6 +104,21 @@ export class PostController {
       Number(req.user.userId),
       postId,
       createCommentDto,
+    );
+  }
+
+  @UseGuards(JwtGuard)
+  @Put('update/comments/:id')
+  async upateComment(
+    @Param('id') commentId: number,
+    @Body() updateCommentDto: UpdateCommentDto,
+    @Req()
+    req: Request & { user: { userId: number | string; username: string } },
+  ) {
+    return this.postService.updateComment(
+      Number(req.user.userId),
+      commentId,
+      updateCommentDto,
     );
   }
 }

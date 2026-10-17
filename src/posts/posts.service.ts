@@ -3,6 +3,7 @@ import { Pool } from 'pg';
 import { CreatePostDto } from '../DTO/createPost.dto';
 import { UpdatePostDto } from '../DTO/updatePost.dto';
 import { CreateCommentDto } from '../DTO/createComment.dto';
+import { UpdateCommentDto } from '../DTO/updateComment.dto';
 
 @Injectable()
 export class PostService {
@@ -131,6 +132,28 @@ export class PostService {
       postId,
       createCommentDto.comment_text,
     ]);
+
+    return result.rows[0];
+  }
+
+  async updateComment(
+    userId: number,
+    commentId: number,
+    updateCommentDto: UpdateCommentDto,
+  ) {
+    const query = `UPDATE comments
+                   SET comment_text = $1 
+                   WHERE comment_id = $2 AND user_id = $3
+                   RETURNING comment_text, comment_id, user_id`;
+
+    const result = await this.pool.query(query, [
+      updateCommentDto.comment_text,
+      commentId,
+      userId,
+    ]);
+
+    if (result.rows.length === 0)
+      throw new NotFoundException(`Comment with ID ${commentId} not found.`);
 
     return result.rows[0];
   }
