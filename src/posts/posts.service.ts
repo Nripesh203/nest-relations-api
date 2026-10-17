@@ -1,9 +1,15 @@
-import { Injectable, Inject, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Inject,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { Pool } from 'pg';
 import { CreatePostDto } from '../DTO/createPost.dto';
 import { UpdatePostDto } from '../DTO/updatePost.dto';
 import { CreateCommentDto } from '../DTO/createComment.dto';
 import { UpdateCommentDto } from '../DTO/updateComment.dto';
+import { use } from 'passport';
 
 @Injectable()
 export class PostService {
@@ -156,5 +162,27 @@ export class PostService {
       throw new NotFoundException(`Comment with ID ${commentId} not found.`);
 
     return result.rows[0];
+  }
+
+  async deleteComment(userId: number, commentId: number) {
+    const query = `DELETE FROM comments 
+                   WHERE user_id = $1 AND comment_id = $2 RETURNING user_id, comment_id`;
+
+    const result = await this.pool.query(query, [userId, commentId]);
+
+    if (result.rows.length === 0) {
+      const query = `SELECT comment_id FROM comments WHERE comment_id = $1`;
+
+      const commentCheck = await this.pool.query(query, [commentId]);
+
+      if (commentCheck.rows.length === 0) {
+        throw new NotFoundException(`Comment with ID ${commentId} not found.`);
+      }
+
+      throw new ForbiddenException(
+        `You cannot delete comment from another user.`,
+      );
+    }
+    return `Comment with ID ${commentId} deleted successfully.`;
   }
 }

@@ -110,7 +110,7 @@ export class PostController {
   @UseGuards(JwtGuard)
   @Put('update/comments/:id')
   async upateComment(
-    @Param('id') commentId: number,
+    @Param('id', ParseIntPipe) commentId: number,
     @Body() updateCommentDto: UpdateCommentDto,
     @Req()
     req: Request & { user: { userId: number | string; username: string } },
@@ -120,5 +120,15 @@ export class PostController {
       commentId,
       updateCommentDto,
     );
+  }
+
+  @UseGuards(JwtGuard)
+  @Delete('delete/comments/:id')
+  async deleteComment(
+    @Param('id', ParseIntPipe) commentId: number,
+    @Req()
+    req: Request & { user: { userId: number | string; username: string } },
+  ) {
+    return this.postService.deleteComment(Number(req.user.userId), commentId);
   }
 }
