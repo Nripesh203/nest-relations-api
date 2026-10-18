@@ -89,7 +89,7 @@ export class PostController {
     @Req()
     req: Request & { user: { userId: number | string; username: string } },
   ) {
-    return this.postService.deletePost(postId, Number(req.user.userId));
+    return this.postService.deletePost(Number(req.user.userId), postId);
   }
 
   @UseGuards(JwtGuard)
@@ -150,5 +150,15 @@ export class PostController {
     req: Request & { user: { userId: string | Number; username: string } },
   ) {
     return this.postService.unlikePost(Number(req.user.userId), postId);
+  }
+
+  @UseGuards(JwtGuard)
+  @Post('comments/:id/likes')
+  async likeComment(
+    @Param('id', ParseIntPipe) commentId: number,
+    @Req()
+    req: Request & { user: { userId: number | string; username: string } },
+  ) {
+    return this.postService.likeComment(Number(req.user.userId), commentId);
   }
 }

@@ -218,4 +218,25 @@ export class PostService {
 
     return `Like with post ID ${postId} removed successfully.`;
   }
+
+  async likeComment(userId: number, commentId: number) {
+    const query = `INSERT INTO comment_likes (user_id, comment_id)
+                   VALUES ($1, $2)
+                   RETURNING comment_id`;
+
+    try {
+      const result = await this.pool.query(query, [userId, commentId]);
+      return result.rows[0];
+    } catch (error: unknown) {
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'code' in error &&
+        error.code === '23505'
+      ) {
+        throw new ConflictException('You have already liked this comment.');
+      }
+      throw error;
+    }
+  }
 }
