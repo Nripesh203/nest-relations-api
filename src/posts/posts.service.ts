@@ -51,7 +51,13 @@ export class PostService {
   }
 
   async getCommentsInPost(id: number) {
-    const query = `SELECT * FROM comments WHERE post_id = $1`;
+    const query = `SELECT u.user_id, u.username, c.comment_id, c.comment_text, COUNT(cl.user_id)::int  AS comment_like_count
+                  FROM comments c
+                  LEFT JOIN users u ON u.user_id = c.user_id
+                  LEFT JOIN comment_likes cl ON c.comment_id = cl.comment_id
+                  WHERE c.post_id = $1
+                  GROUP BY u.user_id, u.username, c.comment_id, c.comment_text
+                  ORDER BY u.user_id`;
 
     const result = await this.pool.query(query, [id]);
 
