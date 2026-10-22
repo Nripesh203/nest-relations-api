@@ -239,4 +239,13 @@ export class PostService {
       throw error;
     }
   }
+
+  async unlikeComment(userId: number, commentId: number) {
+    const query = `DELETE FROM comment_likes
+                   WHERE user_id = $1 AND comment_id = $2 `;
+
+    const result = await this.pool.query(query, [userId, commentId]);
+
+    return result.rows[0];
+  }
 }

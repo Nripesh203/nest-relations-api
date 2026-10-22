@@ -161,4 +161,14 @@ export class PostController {
   ) {
     return this.postService.likeComment(Number(req.user.userId), commentId);
   }
+
+  @UseGuards(JwtGuard)
+  @Delete('comments/:id/unlike')
+  async unlikeComment(
+    @Param('id', ParseIntPipe) commentId: number,
+    @Req()
+    req: Request & { user: { userId: number | string; username: string } },
+  ) {
+    return this.postService.unlikeComment(Number(req.user.userId), commentId);
+  }
 }
