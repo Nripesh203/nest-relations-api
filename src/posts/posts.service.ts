@@ -252,6 +252,6 @@ export class PostService {
 
     const result = await this.pool.query(query, [userId, commentId]);
 
-    return result.rows[0];
+    return 'Unliked comment successfully.';
   }
 }
